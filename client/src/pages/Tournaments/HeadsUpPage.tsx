@@ -1,5 +1,5 @@
-import HeadsUpTournaments from '@/components/HeadsUpTournaments';
-import RecentWinners from '@/components/RecentWinners';
+import HeadsUpTournaments from '@/components/Tournaments/HeadsUpTournaments';
+import RecentWinners from '@/components/Tournaments/RecentWinners';
 
 export default function HeadsUpPage() {
   return (

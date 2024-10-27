@@ -4,19 +4,23 @@ const socketHandler = require('./sockets');
 const app = require('./app');
 const initConfig = require('./config/index');
 const logger = require('./utils/logger');
+const socketio = require('socket.io')
+const sockets = require('./sockets');
 
 require('dotenv').config();
 initConfig();
 
 const server = http.createServer(app);
 
-// const io = require('socket.io')(server, {
-//     cors: {
-//         origin: "*", 
-//         methods: ["GET", "POST"],
-//     },
-// });
-// socketHandler(io);
+const io = socketio(server, {
+    cors: {
+        origin: "http://localhost:5173",
+        methods: ['GET', 'POST'],
+        credentials: true,
+    },
+});
+
+sockets(io);
 
 
 const PORT = process.env.PORT || 3000;

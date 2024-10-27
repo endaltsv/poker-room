@@ -1,5 +1,5 @@
 import { Users } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 
 export default function MTTTournaments() {
   const tournaments = [

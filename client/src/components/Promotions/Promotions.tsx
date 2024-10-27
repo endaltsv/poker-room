@@ -6,10 +6,10 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { ChevronRight, DollarSign, Trophy, CalendarDays } from 'lucide-react';
 
-export default function NewsAndPromotions() {
+export default function Promotions() {
   return (
     <section>
       <h2 className="text-3xl font-bold mb-8 text-center">Новости и акции</h2>

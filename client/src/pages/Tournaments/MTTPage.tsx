@@ -1,4 +1,4 @@
-import MTTTournaments from '@/components/MTTTournaments';
+import MTTTournaments from '@/components/Tournaments/MTTTournaments';
 
 export default function MTTPage() {
   return (

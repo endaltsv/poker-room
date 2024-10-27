@@ -7,9 +7,33 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Users } from 'lucide-react';
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
+import { SocketContext } from '@/context/SocketContext';
+import { useContext, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSocketEvents } from '@/hooks/useSocketEvents';
 
 export default function HeadsUpTournaments() {
+  const socket = useContext(SocketContext);
+  const navigate = useNavigate();
+  const [status, setStatus] = useState<string>('Не зарегестрирован');
+
+  useSocketEvents({
+    room_created: () => {
+      setStatus('Ожидание второго игрока');
+    },
+    start_game: (roomId: string) => {
+      navigate(`/game/${roomId}`);
+    },
+  });
+
+  const handleRegister = () => {
+    if (socket) {
+      socket.emit('register');
+      setStatus('Зарегестрирован');
+    }
+  };
+
   const tournaments = [
     {
       id: 1,
@@ -51,7 +75,7 @@ export default function HeadsUpTournaments() {
   return (
     <section>
       <h2 className="w-full mx-auto text-3xl font-bold mb-8 text-center">
-        Текущие турниры
+        Текущие турниры. {status}
       </h2>
       <Tabs defaultValue="headsup" className="w-full">
         <TabsContent value="headsup">
@@ -85,7 +109,9 @@ export default function HeadsUpTournaments() {
                   </div>
                 </CardContent>
                 <CardFooter>
-                  <Button className="w-full">Зарегистрироваться</Button>
+                  <Button className="w-full" onClick={handleRegister}>
+                    Зарегистрироваться
+                  </Button>
                 </CardFooter>
               </Card>
             ))}
