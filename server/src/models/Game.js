@@ -15,6 +15,7 @@ class Game {
       position: null,
       cards: [],
       hasActed: false,
+      lastAction: null,
     }));
     this.deck = [];
     this.pot = 0;
@@ -24,6 +25,7 @@ class Game {
     this.communityCards = [];
     this.winnerId = null;
     this.io = io; // Сохраняем io для отправки сообщений
+    this.showdown = false;
   }
 
   initializeGame() {
@@ -119,7 +121,7 @@ class Game {
         }
       });
     }
-
+    player.lastAction = action.type;
     // Проверяем, остался ли один активный игрок
     if (this.players.filter((p) => !p.folded).length <= 1) {
       this.determineWinner();
@@ -136,6 +138,10 @@ class Game {
 
     // Обновляем состояние игры
     this.broadcastGameState();
+
+    this.players.forEach((p) => {
+      p.lastAction = null;
+    });
   }
 
   advanceToNextPlayer() {
@@ -197,8 +203,10 @@ class Game {
       winner.chips += this.pot;
       this.pot = 0;
       this.winnerId = winner.id;
+      this.showdown = false;
     } else {
       // Используем pokersolver для определения победителя
+      this.showdown = true;
       const hands = activePlayers.map((player) => {
         const playerCards = player.cards.map((card) => mapCardToSolver(card));
         const communityCards = this.communityCards.map((card) => mapCardToSolver(card));
@@ -246,6 +254,7 @@ class Game {
         p.folded = false;
         p.cards = [];
         p.hasActed = false;
+        p.lastAction = null;
       });
       this.initializeGame();
     } else {
@@ -275,6 +284,7 @@ class Game {
         position: p.position,
         isDealer: p.isDealer,
         cards: p.id === playerId || this.winnerId ? p.cards : [], // Отправляем карты только текущему игроку или после окончания игры
+        lastAction: p.lastAction,
       })),
       pot: this.pot,
       currentBet: this.currentBet,
@@ -282,6 +292,7 @@ class Game {
       round: this.round,
       communityCards: this.communityCards,
       winnerId: this.winnerId,
+      showdown: this.showdown,
     };
   }
 }

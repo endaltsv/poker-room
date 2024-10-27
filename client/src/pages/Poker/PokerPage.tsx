@@ -1,6 +1,6 @@
 // src/pages/GamePage.tsx
 
-import React, { useEffect, useState, useContext } from 'react';
+import React, { useEffect, useState, useContext, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { SocketContext } from '../../context/SocketContext';
 import { useSocketEvents } from '../../hooks/useSocketEvents';
@@ -13,7 +13,16 @@ const GamePage: React.FC = () => {
   const navigate = useNavigate();
   const [gameState, setGameState] = useState<GameState | null>(null);
   const [betAmount, setBetAmount] = useState<number>(50);
-  const [playerId, setPlayerId] = useState<string | undefined>('');
+  const [playerId, setPlayerId] = useState<string>('');
+  const [opponentLastAction, setOpponentLastAction] = useState<string | null>(
+    null,
+  );
+  const [opponentLastActionTime, setOpponentLastActionTime] = useState<
+    number | null
+  >(null);
+
+  // Используем useRef для хранения предыдущего действия оппонента
+  const prevOpponentLastActionRef = useRef<string | null>(null);
 
   useEffect(() => {
     if (socket && roomId) {
@@ -32,15 +41,44 @@ const GamePage: React.FC = () => {
     },
   });
 
-  if (!gameState) {
+  const player = gameState?.players.find((p) => p.id === playerId);
+  const opponent = gameState?.players.find((p) => p.id !== playerId);
+
+  useEffect(() => {
+    if (gameState && opponent) {
+      if (
+        opponent.lastAction &&
+        opponent.lastAction !== prevOpponentLastActionRef.current
+      ) {
+        setOpponentLastAction(opponent.lastAction);
+        setOpponentLastActionTime(Date.now());
+        prevOpponentLastActionRef.current = opponent.lastAction;
+      } else if (!opponent.lastAction && prevOpponentLastActionRef.current) {
+        // Действие оппонента было сброшено на сервере
+        setOpponentLastAction(null);
+        prevOpponentLastActionRef.current = null;
+      }
+    } else {
+      // Сбрасываем состояние, если оппонента нет
+      setOpponentLastAction(null);
+      prevOpponentLastActionRef.current = null;
+    }
+  }, [gameState, opponent]);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout | null = null;
+    if (opponentLastActionTime) {
+      timer = setTimeout(() => {
+        setOpponentLastAction(null);
+      }, 2000); // Время в миллисекундах
+    }
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [opponentLastActionTime]);
+
+  if (!gameState || !player) {
     return <div>Loading game...</div>;
-  }
-
-  const player = gameState.players.find((p) => p.id === playerId);
-  const opponent = gameState.players.find((p) => p.id !== playerId);
-
-  if (!player) {
-    return <div>Player not found</div>;
   }
 
   const isPlayerTurn = gameState.currentPlayerId === playerId;
@@ -64,6 +102,7 @@ const GamePage: React.FC = () => {
   const handleAction = (actionType: string) => {
     if (socket && roomId && gameState && player) {
       const action: any = { type: actionType };
+
       if (actionType === 'raise') {
         action.amount = betAmount;
       }
@@ -71,12 +110,18 @@ const GamePage: React.FC = () => {
         roomId,
         action,
       });
+
       // Сбрасываем betAmount после действия
       setBetAmount(0);
+
+      // Сбрасываем действие оппонента после нашего хода
+      setOpponentLastAction(null);
+      setOpponentLastActionTime(null);
+      prevOpponentLastActionRef.current = null;
     }
   };
 
-  // Сообщение о победителе
+  // Определяем победителя
   const winnerPlayer = gameState.winnerId
     ? gameState.players.find((p) => p.id === gameState.winnerId)
     : null;
@@ -92,6 +137,7 @@ const GamePage: React.FC = () => {
       handleAction={handleAction}
       betAmount={betAmount}
       setBetAmount={setBetAmount}
+      opponentLastAction={opponentLastAction}
     />
   );
 };

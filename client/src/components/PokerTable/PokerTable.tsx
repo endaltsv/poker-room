@@ -18,6 +18,7 @@ interface PokerTableProps {
   handleAction: (actionType: string) => void;
   betAmount: number;
   setBetAmount: React.Dispatch<React.SetStateAction<number>>;
+  opponentLastAction: string | null;
 }
 
 const PokerTable: React.FC<PokerTableProps> = ({
@@ -30,6 +31,7 @@ const PokerTable: React.FC<PokerTableProps> = ({
   handleAction,
   betAmount,
   setBetAmount,
+  opponentLastAction,
 }) => {
   return (
     <div className="h-screen w-full bg-green-800 flex items-center justify-center p-4">
@@ -65,11 +67,28 @@ const PokerTable: React.FC<PokerTableProps> = ({
 
         {/* Игрок сверху (оппонент) */}
         {opponent && (
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center">
-            <div className="bg-gray-800 text-white px-4 py-2 rounded-full mb-4">
-              Chips: ${opponent.chips}
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 flex flex-col items-center animate-fade-in">
+            {/* Отображение количества фишек оппонента */}
+            <div className="bg-gray-800 text-white px-4 py-2 rounded-full mb-4 shadow-lg border border-gray-700">
+              <span className="text-sm font-semibold">Chips:</span> $
+              {opponent.chips}
             </div>
-            <OpponentCards cards={opponent.cards} showCards={!!winnerPlayer} />
+
+            {/* Отображение последнего действия оппонента */}
+            {opponentLastAction && (
+              <div className="bg-gray-800 text-white px-4 py-2 rounded-full mb-2 shadow-lg border border-gray-700">
+                {opponentLastAction.charAt(0).toUpperCase() +
+                  opponentLastAction.slice(1)}
+                {opponentLastAction === 'raise' && opponent.bet && (
+                  <span className="ml-2">- ${opponent.bet}</span>
+                )}
+              </div>
+            )}
+
+            <OpponentCards
+              cards={opponent.cards}
+              showCards={gameState.showdown}
+            />
           </div>
         )}
       </div>

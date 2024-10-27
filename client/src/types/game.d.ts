@@ -13,6 +13,7 @@ export interface Player {
   position: 'Dealer' | 'SB' | 'BB' | null;
   isDealer: boolean;
   cards: CardType[];
+  lastAction: string;
 }
 
 export interface GameState {
@@ -24,4 +25,5 @@ export interface GameState {
   round: string;
   communityCards: CardType[];
   winnerId?: string;
+  showdown: boolean;
 }
