@@ -7,7 +7,7 @@ import AuthLayout from './components/layout/AuthLayout/AuthLayout';
 import TournamentsPage from './pages/Tournaments/MTTPage';
 import NewsPage from './pages/Promotions/NewsPage';
 import { SocketProvider } from './context/SocketContext';
-import GamePage from './pages/Game/GamePage';
+import GamePage from './pages/Poker/PokerPage';
 
 const HomePage = lazy(() => import('./pages/HomePage'));
 const LoginPage = lazy(() => import('./pages/Auth/LoginPage'));

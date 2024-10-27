@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Card from './Card';
+import { CardType } from '@/types/game';
 
 interface PlayerCardsProps {
   cards: CardType[];
