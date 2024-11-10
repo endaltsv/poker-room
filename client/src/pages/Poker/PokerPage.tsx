@@ -21,7 +21,6 @@ const GamePage: React.FC = () => {
     number | null
   >(null);
 
-  // Используем useRef для хранения предыдущего действия оппонента
   const prevOpponentLastActionRef = useRef<string | null>(null);
 
   useEffect(() => {
